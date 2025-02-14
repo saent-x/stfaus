@@ -2,7 +2,8 @@
 
 Made with Tauri + SvelteKit + Rust
 
-![App Img](/static/app_img1.jpeg)
+
+<img src="/static/app_img1.jpeg" alt="App Img" width="200" height="100"/>
 
 ## Setup
 
