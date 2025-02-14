@@ -3,7 +3,7 @@
 Made with Tauri + SvelteKit + Rust
 
 
-<img src="/static/app_img1.jpeg" alt="App Img" width="300" height="500"/>
+<img src="/static/app_img1.jpeg" alt="App Img" width="250" height="500"/>
 
 ## Setup
 
