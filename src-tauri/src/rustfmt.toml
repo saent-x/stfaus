@@ -1,0 +1,4 @@
+max_width = 300
+use_small_heuristics = "Max"
+newline_style = "Unix"
+tab_spaces = 4    
