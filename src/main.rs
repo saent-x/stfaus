@@ -14,7 +14,7 @@ use prelude::{get_db, AppState, FAVICON, MAIN_CSS, TAILWIND_CSS};
 
 
 fn main(){
-    dioxus::launch(App);    
+    dioxus::launch(App);
 }
 
 #[component]
@@ -34,10 +34,11 @@ fn App() -> Element {
     rsx! {
         meta {
             name: "viewport",
-            content: "width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no viewport-fit=cover"
+            content: "width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no viewport-fit=cover",
         }
         document::Link { rel: "icon", href: FAVICON }
-        document::Link { rel: "stylesheet", href: MAIN_CSS } document::Link { rel: "stylesheet", href: TAILWIND_CSS }
+        document::Link { rel: "stylesheet", href: MAIN_CSS }
+        document::Link { rel: "stylesheet", href: TAILWIND_CSS }
         Router::<site_router::Route> {}
     }
 }

@@ -54,55 +54,6 @@ pub fn get_app_engine() -> &'static Mutex<AppEngine<'static>> {
     })
 }
 
-// pub fn get_app_engine() -> &'static Mutex<AppEngine<'static>> {
-//     APP_ENGINE.get_or_init(|| {
-//         let mut db = if tokio::runtime::Handle::try_current().is_ok(){
-//             tokio::task::block_in_place(||{
-//                 tokio::runtime::Handle::current()
-//                     .block_on(get_db().lock())
-//             })
-//         }else {
-//             let rt = tokio::runtime::Builder::new_current_thread()
-//                 .enable_all()
-//                 .build()
-//                 .expect("Failed to build temporary runtime");
-            
-//             rt.block_on(get_db().lock())
-//         };
-        
-//         let app_settings = get_app_settings(&mut db);
-        
-//         let config = Config::build(
-//             OPENAI_MODEL, 
-//             app_settings.music_genre.parse::<MusicGenre>()
-//                 .unwrap_or(MusicGenre::Any), 
-//             app_settings.music_era.parse::<MusicEra>()
-//                 .unwrap_or(MusicEra::Any), 
-//             "".to_string(), 
-//             8
-//         );
-//         // check if we have a current runtime running
-//         let spotify_agent = if tokio::runtime::Handle::try_current().is_ok(){
-//             tokio::task::block_in_place(||{
-//                 tokio::runtime::Handle::current()
-//                     .block_on(SpotifyAgent::init())
-//                     .expect("")
-//             })
-//         }else {
-//             // else create a new one -> most likely won't happen
-//             let rt = tokio::runtime::Builder::new_current_thread()
-//                 .enable_all()
-//                 .build()
-//                 .expect("Failed to build temporary runtime");
-            
-//             rt.block_on(SpotifyAgent::init())
-//                 .expect("Failed to initialize SpotifyAgent")
-//         };
-//         dbg!("In line");
-//         Mutex::new(AppEngine::init(config, Box::new(spotify_agent)))
-//     })
-// }
-
 pub fn get_db() -> &'static Mutex<SqliteConnection> {
     DB.get_or_init(|| {
         Mutex::new(create_db())

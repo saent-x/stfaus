@@ -48,7 +48,7 @@ impl From<Track> for Song {
 
 pub fn create_db() -> SqliteConnection {
     //let database_url = env!("DATABASE_URL");
-    SqliteConnection::establish(&"/Users/tor/Documents/projects/st.fauss/db/stfaus.db")
+    SqliteConnection::establish(&"/Users/tor/Documents/projects/st.faus/db/stfaus.db")
         .unwrap_or_else(|e| panic!("Error: {:?}", e.to_string()))
 }
 
