@@ -1,0 +1,11 @@
+/* App-wide styling */
+html, body {
+    height: 100%;
+    background-color: #E6E6E6;
+}
+
+/* prevents zooming */
+:root {
+    touch-action: pan-x pan-y;
+    height: 100%;
+}

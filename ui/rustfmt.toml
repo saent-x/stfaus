@@ -1,0 +1,3 @@
+# unstable_features = true
+# blank_lines_upper_bound = 1 # Allows at most 2 consecutive blank lines
+# blank_lines_lower_bound = 1 # Ensures at least 1 blank line between sections

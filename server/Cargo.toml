@@ -1,0 +1,20 @@
+[package]
+name = "server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.98"
+async-trait = "0.1.88"
+axum = {version = "0.8.4", features = ["macros"]}
+polodb_core = "5.1.4"
+rand = "0.9.1"
+rig-core = "0.12.0"
+rspotify = "0.14.0"
+serde = "1.0.219"
+serde_json = "1.0.140"
+strum = "0.27.1"
+strum_macros = "0.27.1"
+tokio = { version = "1.45.1", features = ["full"]}
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
