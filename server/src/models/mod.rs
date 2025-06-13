@@ -52,7 +52,7 @@ pub struct Song {
     pub preview_url: String,
 }
 
-#[derive(Debug, Clone, EnumIter, PartialEq)]
+#[derive(Debug, Clone, EnumIter, PartialEq, Serialize)]
 pub enum MusicEra {
     Any,
     Modern,

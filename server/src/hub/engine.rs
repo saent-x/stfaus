@@ -16,7 +16,7 @@ struct PromptCall {
     track_count: u16,
 }
 
-const MAX_RETRIES: usize = 3;
+const MAX_RETRIES: usize = 5;
 
 pub struct PromptConfig<'a> {
     id: &'a str,
@@ -92,15 +92,16 @@ impl<'a> AppEngine<'a> {
             .map_err(|e| AppEngineError::AppEngineError(e.to_string()))?;
         let results: Vec<LLMResult> = serde_json::from_str(&response).expect("Err: Failed to parse json");
 
-        let spotify_response = self.search_agent.search(&results).await?;
-        println!("GPT Output Count: {} - SPOTIFY Output Count: {}", results.len(), spotify_response.len());
-        results_buffer.extend(spotify_response.clone());
+        let mut spotify_response = self.search_agent.search(&results).await?;
+        //println!("Track Count: {} - GPT Output Count: {} - SPOTIFY Output Count: {}", prompt_config.track_count, results.len(), spotify_response.len());
         
+        results_buffer.extend(spotify_response.clone());
+                
         let spotify_resp_len = spotify_response.len() - remove_duplicates(results_buffer);
         
         if spotify_resp_len != prompt_config.track_count as usize {
             prompt_config.retries += 1;
-            prompt_config.track_count.sub(spotify_resp_len as u16);
+            prompt_config.track_count -= spotify_resp_len as u16;
             
             return Box::pin(self.send_prompt(prompt_config, results_buffer)).await;
         }

@@ -12,9 +12,7 @@ pub fn generate_rand_id() -> String {
 pub fn remove_duplicates(arr: &mut Vec<Song>) -> usize {
     let mut hs = HashSet::new();
     let initial_len = arr.len();
-    
-    println!("arr len b4: {:?}", arr.len()); // to be removed
-    
+        
     arr.retain(|v| {
         let flag = hs.contains(&(v.title.clone(), v.album.clone()));
         hs.insert((v.title.clone(), v.album.clone()));
@@ -25,8 +23,7 @@ pub fn remove_duplicates(arr: &mut Vec<Song>) -> usize {
         !flag
     });
     
-    println!("hs len: {:?}", hs.len()); // // to be removed
-    println!("arr new len: {:?}", arr.len()); // // to be removed
+    println!("hashset -> {hs:?}");
     
     initial_len - arr.len()
 }

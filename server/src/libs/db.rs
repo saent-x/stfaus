@@ -26,10 +26,10 @@ pub fn get_playlist(db: &Database) -> Result<Vec<Song>, anyhow::Error> {
     }
 }
 
-pub fn save_playlist(db: &Database, data: &Vec<Song>) -> Result<(), anyhow::Error> {
+pub fn save_playlist(db: &Database, data: &Vec<Song>) -> Result<bool, anyhow::Error> {
     let app_collection = db.collection::<AppData>("app_data");
     
-    let _ = app_collection.update_one(doc! {
+    let result = app_collection.update_one(doc! {
         "uuid": "app_state_001"
     }, doc! {
         "$set": doc! {
@@ -37,7 +37,10 @@ pub fn save_playlist(db: &Database, data: &Vec<Song>) -> Result<(), anyhow::Erro
         }
     })?;
 
-    Ok(())
+    match result.modified_count > 0 {
+        true => Ok(true),
+        false => Ok(false)
+    }
 }
 
 pub fn get_app_settings(db: &Database) -> anyhow::Result<AppData> {
@@ -79,10 +82,10 @@ pub fn create_app_settings(db: &Database, data: &AppData) -> Result<(), anyhow::
     Ok(())
 }
 
-pub fn save_app_settings(db: &Database, user_name: String, music_era: String, music_genre: String) -> Result<(), anyhow::Error> {
+pub fn save_app_settings(db: &Database, user_name: String, music_era: String, music_genre: String) -> Result<bool, anyhow::Error> {
     let app_collection = db.collection::<AppData>("app_data");
     
-    app_collection.update_one(doc! {
+    let result = app_collection.update_one(doc! {
         "uuid": "app_state_001"
     }, doc! {
         "$set": doc! {
@@ -91,6 +94,9 @@ pub fn save_app_settings(db: &Database, user_name: String, music_era: String, mu
             "music_genre": music_genre,
         }
     })?;
-
-    Ok(())
+    
+    match result.modified_count > 0 {
+        true => Ok(true),
+        false => Ok(false)
+    }
 }

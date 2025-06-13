@@ -1,72 +1,43 @@
 use dioxus::{logger::tracing::info, prelude::*};
-use strum::IntoEnumIterator;
 
-use crate::{
-    libs::db::{get_app_settings, save_app_settings},
-    models::{MusicEra, MusicGenre},
-    site_router::Route,
+use crate::{ 
+    models::AppSettingsUpdate, services::{get_music_era_genre_list, get_settings, update_settings}, site_router::Route
 };
 
-#[derive(Debug, Clone)]
-pub struct AppSettings {
-    pub account_name: String,
-    pub music_era: String,
-    pub music_genre: String,
-    pub provider: String,
-}
 
 #[component]
 pub fn Settings() -> Element {
-    let app_settings = use_server_future(move || {
-        async move {
-            let state = get_state_from_server(); 
-
-            let mut db = state.db.get().unwrap();
-            get_app_settings(&mut db)
-        }
-    })?;
+    let app_settings = use_resource(get_settings).suspend()?()?;
+    let music_era_genre_list = use_resource(get_music_era_genre_list).suspend()?()?;
     
-    let app_settings = app_settings.unwrap();
-
     let mut saving = use_signal(|| false);
-    let mut account_name: Signal<String> = use_signal(|| app_settings.user_name.clone());
-    let mut music_era: Signal<MusicEra> = use_signal(|| {
-        app_settings
-            .music_era
-            .parse::<MusicEra>()
-            .unwrap_or(MusicEra::Any)
-    });
-    let mut music_genre: Signal<MusicGenre> = use_signal(|| {
-        app_settings
-            .music_genre
-            .parse::<MusicGenre>()
-            .unwrap_or(MusicGenre::Any)
-    });
-    let mut provider: Signal<String> = use_signal(|| app_settings.provider.clone());
+    let mut user_name: Signal<String> = use_signal(|| app_settings.user_name);
+    let mut music_era: Signal<String> = use_signal(|| app_settings.music_era);
+    let mut music_genre: Signal<String> = use_signal(|| app_settings.music_genre);
 
     rsx!(
-        div { class: "flex flex-col items-center mt-10 pt-[env(safe-area-inset-bottom)]",
+        div { class: "flex flex-col items-center pt-[30px]",
             "Settings"
             Back {}
-            div { class: "flex flex-col gap-4 mt-8 p-8 w-full",
+            div { class: "flex flex-col items-center gap-4 mt-8 p-8 w-full",
                 fieldset { class: "fieldset",
                     legend { class: "fieldset-legend", "Account Name" }
                     input {
-                        class: "input",
+                        class: "input w-[800px]",
                         required: "false",
                         r#type: "text",
                         placeholder: "general-user",
                         inputmode: "text",
-                        value: account_name(),
-                        onchange: move |ev| account_name.set(ev.value()),
+                        value: user_name(),
+                        onchange: move |ev| user_name.set(ev.value()),
                     }
                 }
                 fieldset { class: "fieldset",
                     legend { class: "fieldset-legend", "Music Era" }
                     select {
-                        class: "select",
-                        onchange: move |ev| music_era.set(ev.value().parse::<MusicEra>().unwrap()),
-                        for variant in MusicEra::iter() {
+                        class: "select w-[800px]",
+                        onchange: move |ev| music_era.set(ev.value()),
+                        for variant in music_era_genre_list.music_eras {
                             option {
                                 selected: variant == music_era(),
                                 value: variant.to_string(),
@@ -78,9 +49,9 @@ pub fn Settings() -> Element {
                 fieldset { class: "fieldset",
                     legend { class: "fieldset-legend", "Music Genre" }
                     select {
-                        class: "select",
-                        onchange: move |ev| music_genre.set(ev.value().parse::<MusicGenre>().unwrap()),
-                        for variant in MusicGenre::iter() {
+                        class: "select w-[800px]",
+                        onchange: move |ev| music_genre.set(ev.value()),
+                        for variant in music_era_genre_list.music_genres {
                             option {
                                 selected: variant == music_genre(),
                                 value: variant.to_string(),
@@ -89,39 +60,24 @@ pub fn Settings() -> Element {
                         }
                     }
                 }
-                fieldset { class: "fieldset",
-                    legend { class: "fieldset-legend", "Provider" }
-                    select {
-                        class: "select",
-                        onchange: move |ev| provider.set(ev.value()),
-                        option {
-                            selected: provider() == "Spotify",
-                            value: "Spotify",
-                            "Spotify"
-                        }
-                        option {
-                            selected: provider() == "Apple Music",
-                            value: "Apple Music",
-                            "Apple Music"
-                        }
-                    }
-                }
+                
                 div { class: "flex flex-row justify-center mt-10",
                     button {
                         aria_label: "save-button",
                         onclick: move |_| async move {
                             saving.set(true);
-                            let app = AppSettings {
-                                account_name: account_name(),
+                            let app = AppSettingsUpdate {
+                                user_name: user_name(),
                                 music_era: music_era().to_string(),
                                 music_genre: music_genre().to_string(),
-                                provider: provider(),
                             };
-                            save_app_settings(&app).expect("failed to save app settings");
-                            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                            update_settings(app)
+                                .await.expect("failed to save app settings");
+                            
+                            tokio::time::sleep(std::time::Duration::from_secs(1)).await; // probably won't work
                             saving.set(false);
                         },
-                        class: "btn btn-lg w-[100%] text-white bg-black border-0 shadow-lg",
+                        class: "btn btn-lg w-[300px] text-white bg-black border-0 shadow-lg",
                         if saving() {
                             span { class: "loading loading-spinner" }
                         }
@@ -129,7 +85,7 @@ pub fn Settings() -> Element {
                     }
                 }
             }
-            div { class: "absolute bottom-0 flex flex-row justify-center w-full",
+            div { class: "flex flex-row justify-center w-full",
                 "made with ❤️ by"
                 b { class: "ml-1 underline",
                     a { href: "https://github.com/saent-x", "devtor" }

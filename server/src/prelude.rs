@@ -2,7 +2,6 @@ use anyhow;
 use axum::{http::StatusCode, response::IntoResponse};
 
 
-
 pub struct AppError(anyhow::Error);
 
 impl IntoResponse for AppError {

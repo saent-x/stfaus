@@ -1,30 +1,32 @@
-use dioxus::prelude::*;
+use dioxus::{logger::tracing::info, prelude::*};
 
-use crate::{libs::llm_serverfns::search_playlist, prelude::AppState};
+use crate::{prelude::{AppState, CURRENT_PLAYLIST, CURRENT_PROMPT}, services::search_playlist};
 
 #[component]
 pub fn LLM_Chatbot() -> Element {
     let mut app_state = use_context::<Signal<AppState>>();
     let mut expression = use_signal(String::new);
-    let mut running = use_signal(|| false);
 
-    let on_chat_click = move |ev: Event<MouseData>| async move {
-        ev.prevent_default();
-
-        running.set(true);
-        app_state.write().searching = true;
-
-        let results = search_playlist(expression())
-            .await
-            .expect("failed to retrieve playlist"); //TODO: handle error
-
-        app_state.write().current_playlist = results;
-        app_state.write().searching = false;
-        running.set(false);
+    let on_chat_click = move |ev: Event<KeyboardData>| async move {
+        if ev.key() == Key::Enter{
+            ev.prevent_default();
+            
+            app_state.write().searching = true;
+            let results = search_playlist(&crate::models::UserPromptRequest { prompt: expression() })
+                .await
+                .expect("failed to retrieve playlist"); //TODO: handle error
+                    
+            *CURRENT_PLAYLIST.write() = results;
+            *CURRENT_PROMPT.write() = expression();
+            
+            app_state.write().searching = false;
+            expression.set("".to_string());            
+        }
     };
 
     rsx! {
-        label { class: "input w-[100%] h-12 glass shadow-md bg-white rounded-full",
+        label { 
+            class: "input lg:w-[800px] min-w-[300px] md:w-[800px] h-12 focus-within:!outline focus-within:!outline-[0px] glass !border-2 !border-black-800 shadow-md bg-white rounded-full",
             svg {
                 "viewBox": "0 0 24 24",
                 "stroke-width": "1.5",
@@ -41,28 +43,12 @@ pub fn LLM_Chatbot() -> Element {
             input {
                 required: "false",
                 r#type: "search",
-                placeholder: "state of mind...",
-                enterkeyhint: "go",
+                placeholder: "Enter your playlist description...",
                 value: expression(),
+                onkeypress: on_chat_click,
+                disabled: app_state().searching,
                 inputmode: "text",
-                onchange: move |ev| expression.set(ev.value()),
-            }
-            button {
-                onclick: on_chat_click,
-                aria_label: "send-button",
-                disabled: running(),
-                class: "btn btn-circle bg-black border-0 shadow-lg glass",
-                svg {
-                    xmlns: "http://www.w3.org/2000/svg",
-                    fill: "white",
-                    "viewBox": "0 0 24 24",
-                    class: "size-4",
-                    path {
-                        "stroke-linecap": "round",
-                        "stroke-linejoin": "round",
-                        d: "M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5",
-                    }
-                }
+                oninput: move |ev| expression.set(ev.value()),
             }
         }
     }
