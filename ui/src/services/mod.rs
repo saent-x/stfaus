@@ -3,7 +3,7 @@ use dioxus::logger::tracing::info;
 
 use crate::models::{AppSettingsUpdate, MusicEraGenreList, Song, UserPromptRequest};
 
-const BASE_URL: &str = "http://127.0.0.1:3000";
+const BASE_URL: &str = "http://127.0.0.1:4000";
 
 pub(crate) async fn search_playlist(user_prompt: &UserPromptRequest) -> dioxus::Result<Vec<Song>>{    
     let client = reqwest::Client::new();
